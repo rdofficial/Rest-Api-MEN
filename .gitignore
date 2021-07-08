@@ -1,0 +1,8 @@
+# Ignore list
+# ----
+# 1. Ignore the cache files, modules, etc.
+# ----
+
+# Ignoring the installed modules and cache files
+node_modules/
+package-lock.json
