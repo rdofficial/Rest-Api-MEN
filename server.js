@@ -4,8 +4,11 @@ server.js - NarcotaApi
 Author : Rishav Das (https://github.com/rdofficial/)
 Created on : July 8, 2021
 
-Last modified by : -
-Last modified on : -
+Last modified by : Rishav Das (https://github.com/rdofficial/)
+Last modified on : July 9, 2021
+
+Changes made in the last modification :
+1. Removed all the previously defind endpoints and defined new endpoints for the URLs '/textutils/encrypt' and '/textutils/decrypt', as well as defined functions for string encryption and decryption.
 
 Authors contributed to this script (Add your name below if you have contributed) :
 1. Rishav Das (github:https://github.com/rdofficial/, email:rdofficial192@gmail.com)
@@ -18,7 +21,7 @@ const Mongoose = require('mongoose');
 const Cors = require('cors');
 
 // Importing the custom models created
-const Product = require('./models/products');
+//
 
 // Creating the express app
 const app = Express();
@@ -47,124 +50,93 @@ app.get('/', (request, response) => {
 	return response.send(`Maximum effort ~ Check the other rooms for TV remote`);
 });
 
-// Defining the /products endpoint
-// GET Request
-app.get('/products', (request, response) => {
-	/* This function serves the functionality of serving the response when there is a GET request on the /products endpoint of the web app. The function fetches list of all the product entries stored in the database. */
-
-	try {
-		// Sending the request to fetch the products
-		Product.find((error, data) => {
-			if (error) {
-				// If there are any errors in fetching the database, then we return the error message back to the client
-
-				return response.status(500).send(error);
-			} else {
-				// If there are no errors encountered during the fetching process, then we return the fetched data back to the client
-
-				return response.status(500).send(data);
-			}
-		});
-	} catch (error) {
-		// If there are any errors encountered during the process, then we return the error message back to the client
-
-		return response.status(500).send(error);
-	}
-});
-
-// Defining the  /products/new endpoint
+// Defining the Text utils encrypt (/textutils/encrypt) endpoint
 // POST Request
-app.post('/products/new', (request, response) => {
-	/* This function serves the functionality of serving the response when there is a POST request on the /products/new endpoint of the web app. The function creates a new product entry in the database, using the user specified data and parameters. */
+app.post('/textutils/encrypt', (request, response) => {
+	/* This function serves the functionality of serving the response when there is a HTTP POST request on the '/textutils/encrypt' URL of the app. The function returns the encrypted form of string as per password and plain string specified by the user. */
 
-	// Verifying the user inputs from the POST request data
-	// -----
-	if (request.body.name != undefined) {
-		// If the name of the product entered by the user is defined, then we continue for further validation
-
-		if (request.body.name.length == 0) {
-			// If the name of the product specified by the user is an empty string, then we return the error message back to the client
-
-			return response.status(500).send('{"error":"ValueError", "message" : "Invalid name for the new product specified"}');
-		}
-	} else {
-		// If the name of the product entered by the user is not defined, then we return the error message back to the client
-
-		return response.status(500).send('{"error":"ValueError", "message" : "Invalid name for the new product specified"}');
-	}
-	if (request.body.price != undefined) {
-		// If the name of the product entered by the user is defined, then we continue for further validation
-
-		if ((request.body.price > 0) == false) {
-			// If the price of product specified by the user is an number more than 0, then we return the error message back to the client
-
-			return response.status(500).send('{"error":"ValueError", "message" : "Invalid price for the new product specified"}');
-		}
-	} else {
-		// If the price of the product entered by the user is not defined, then we return the error message back to the client
-
-		return response.status(500).send('{"error":"ValueError", "message" : "Invalid price for the new product specified"}');
-	}
-	// ----
-
-	try {
-		// Sending the request to insert a new product
-		Product.create(request.body, (error, data) => {
-			if (error) {
-				// If there are any errors in fetching the database, then we return the error message to the client
-
-				return response.status(500).send(error);
-			} else {
-				// If there are no errors encountered during the fetching process, then we return the fetched data back to the client
-
-				return response.status(200).send(data);
-			}
-		});
-	} catch (error) {
-		// If there are any errors encountered during the process, then we return the error message back to the client
-
-		return response.status(500).send(error);
-	}
+	let text = encrypt(request.body.text, request.body.password);
+	return response.send(text);
 });
 
-// Defining the /products/delete endpoint
+// Defining the Text utils encrypt (/textutils/decrypt) endpoint
 // POST Request
-app.post('/products/delete', (request, response) => {
-	/* This function serves the functionality of serving the response when there is a POST request on the /products/delete endpoint of the web app. The function deletes the product entries in the database as per the user inputs. If the user specified the Id of the product, then the particular product is deleted. If the user speicified the name of the product entry, then all the products with such name gets deleted. */
+app.post('/textutils/decrypt', (request, response) => {
+	/* This function serves the functionality of serving the response when there is a HTTP POST request on the '/textutils/decrypt' URL of the app. The function returns the decrypted and plain form of an already encrypted string as per password and plain string specified by the user. */
 
-	// Checking the inputs specified by the user in the POST request data
-	// ----
-	if (request.body.id != undefined) {
-		// If the user specified the Id of the product to be deleted, then we continue
-
-		Product.deleteOne({_id : request.body.id}).then(() => {
-			// If the requested fields are deleted successfully, then we return the info message back to the client
-
-			return response.status(200).send('deleted : 1');
-		}).catch(error => {
-			// If there are any errors encountered during the process, then we return the error message back to the client
-
-			return response.status(500).send(error);
-		});
-	} else if (request.body.name != undefined) {
-		// If the user specified the name of the product to be deleted, then we continue
-
-		Product.deleteMany({name : request.body.name}).then(() => {
-			// If the requested fields are deleted successfully, then we return the info message back to the client
-
-			return response.status(200).send('deleted all');
-                }).catch(error => {
-			// If there are any errors encountered during the process, then we return the error message back to the client
-
-			return response.status(500).send(error);
-                });
-	} else {
-		// If the user specified Id or the name is not defined, then return the error message back to the client
-
-		return response.status(500).send('{"error" : "ValueError", "message" : "Proper data not specified"}');
-	}
-	// ----
+	let text = decrypt(request.body.text, request.body.password);
+	return response.send(text);
 });
+
+// Functions defined to serve any other internal tasks
+// ----
+const encrypt = (text, password) => {
+	/* The function to encrypt a string using a password string ;-) */
+
+	let key = 0, isEven = true;
+	for (let i of password) {
+		if (isEven) {
+			key += i.charCodeAt();
+		} else {
+			key -= i.charCodeAt();
+		}
+		isEven = !isEven; // It will make the isEven false if it is true and true if it is false
+	}
+	if (key < 0) {
+		key = key * (-1);
+	}
+	key += password.length;
+
+	// Jumping the characters of the text (plain)
+	let encryptedText = ``;
+	text.split('').forEach((element, index) => {
+		// Iterating through the each characters of the plain text specified by the user
+
+		encryptedText += String.fromCharCode((element.charCodeAt() + key) % 256);
+	});
+
+	// Encoding the jumbled character to the base64
+	encryptedText = Buffer.from(encryptedText, 'utf-8').toString('base64');
+
+	// Returning back the cipher text
+	return encryptedText;
+}
+
+const decrypt = (text, password) => {
+	/* The function to decrypt a string using a password string that was used to encrypt it */
+	
+	let key = 0, isEven = true;
+	for (let i of password) {
+		if (isEven) {
+			key += i.charCodeAt();
+		} else {
+			key -= i.charCodeAt();
+		}
+		isEven = !isEven; // It will make the isEven false if it is true and true if it is false
+	}
+	if (key < 0) {
+		key = key * (-1);
+	}
+	key += password.length;
+	
+	// Decoding the cipher text from base64 format back to the ASCII format
+	text = Buffer.from(text, 'base64').toString('utf-8');
+
+	// Jumping the characters of the text (encrypted) to plain text (original)
+	let decryptedText = ``;
+	text.split('').forEach((element, index) => {
+		// Iterating through the each characters of the plain text specified by the user
+		if(element.charCodeAt() < key){
+			decryptedText += String.fromCharCode((element.charCodeAt() - key + 256) % 256);
+		}
+		else{
+			decryptedText += String.fromCharCode((element.charCodeAt() - key) % 256);
+		}
+	});
+
+	return decryptedText;
+}
+// ----
 
 // Listening on the specfic port
 app.listen(port, (error) => {
