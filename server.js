@@ -5,7 +5,7 @@ Author : Rishav Das (https://github.com/rdofficial/)
 Created on : July 8, 2021
 
 Last modified by : Rishav Das (https://github.com/rdofficial/)
-Last modified on : July 10, 2021
+Last modified on : July 11, 2021
 
 Changes made in the last modification :
 1. Created the encryption.js module in order to aid the encryption-decryption process defined under this application.
@@ -70,6 +70,53 @@ app.post('/textutils/decrypt', (request, response) => {
 	/* This function serves the functionality of serving the response when there is a HTTP POST request on the '/textutils/decrypt' URL of the app. The function returns the decrypted and plain form of an already encrypted string as per password and plain string specified by the user. */
 
 	let text = Encryption.decrypt(request.body.text, request.body.password);
+	return response.send(text);
+});
+
+// Defining the Text utils capitalize (/textutils/capitalize) endpoint
+// POST Request
+app.post('/textutils/capitalize', (request, response) => {
+	/* This function serves the functionality of serving the response when there is a HTTP POST request on the '/textutils/capitalize' URL of the app. The function returns the auto capitalized form of the text input that is specified by the user. */
+
+	// Checking the user specified inputs
+	// ----
+	if (request.body.text == undefined) {
+		// If the user did not specified the text input, then we return the error message back to the client
+
+		return response.send({error : 'ValueError', message : 'The text input not specified'});
+	}
+	// ----
+
+	// Auto capitalizing first characters of each sentence in the user specified text
+	// ----
+	let text = '';
+	let sentences = request.body.text.split('.');
+	if (sentences.length == 0) {
+		// If there are no text or sentences in the user specified text, then we a blank string back to the client
+
+		return response.send('')
+	} else {
+		// If there are atleast one or more sentences, then we continue the process further
+
+		for (let sentence of sentences) {
+			// Iterating through each sentences of the user specified text
+
+			if (sentence == '') {
+				// If the sentence is blank, then we skip the current iteration
+
+				continue;
+			} else {
+				if (sentence[0] == ' ') {
+					text = text + ' ' + sentence[1].toUpperCase() + sentence.substr(2) + '.';
+				} else {
+					text = text + sentence[0].toUpperCase() + sentence.substr(1) + '.';
+				}
+			}
+		}
+	}
+	// ----
+
+	// Returining the processed text back to the client
 	return response.send(text);
 });
 
