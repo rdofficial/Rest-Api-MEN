@@ -5,10 +5,10 @@ Author : Rishav Das (https://github.com/rdofficial/)
 Created on : July 8, 2021
 
 Last modified by : Rishav Das (https://github.com/rdofficial/)
-Last modified on : July 11, 2021
+Last modified on : July 12, 2021
 
 Changes made in the last modification :
-1. Created the encryption.js module in order to aid the encryption-decryption process defined under this application.
+1. Added more validation and error reducing codes to the functions. Commented the code for serving the mongoose connection.
 
 Authors contributed to this script (Add your name below if you have contributed) :
 1. Rishav Das (github:https://github.com/rdofficial/, email:rdofficial192@gmail.com)
@@ -38,14 +38,20 @@ app.use(BodyParser.json());
 app.use(Cors());
 
 // The URL to connect to the remote Mongo database
-const databaseConnectionUrl = `mongodb+srv://amnesiaaffecteduser:f4ckth3w0rld@cluster0.ymh8g.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+// const databaseConnectionUrl = `mongodb+srv://amnesiaaffecteduser:f4ckth3w0rld@cluster0.ymh8g.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 
-// Connecting to the remote database
-Mongoose.connect(databaseConnectionUrl, {
-	useNewUrlParser: true,
-	useCreateIndex: true,
-	useUnifiedTopology: true,
-});
+// // Connecting to the remote database
+// Mongoose.connect(databaseConnectionUrl, {
+// 	useNewUrlParser: true,
+// 	useCreateIndex: true,
+// 	useUnifiedTopology: true, }, (error) => {
+// 		// Checking for the errors while connecting to the MongoDb server
+// 		if (error) {
+// 			// If there are any errors encountered during the process, then we display the error message on the console screen
+
+// 			console.log(error);
+// 		}
+// });
 
 // Defining the '/' (index) endpoint
 // GET Request
@@ -58,18 +64,48 @@ app.get('/', (request, response) => {
 // Defining the Text utils encrypt (/textutils/encrypt) endpoint
 // POST Request
 app.post('/textutils/encrypt', (request, response) => {
-	/* This function serves the functionality of serving the response when there is a HTTP POST request on the '/textutils/encrypt' URL of the app. The function returns the encrypted form of string as per password and plain string specified by the user. */
+	/* This function serves the functionality of serving the response when there is a HTTP POST request on the '/textutils/encrypt' URL of the app. The function returns the encrypted form of string as per password and plain string specified by the user. The Encryption class is implemented in this endpoint, through which we encrypt the required text. */
 
-	let text = Encryption.encrypt(request.body.text, request.body.password);
+	// Validating the user specified inputs
+	// ----
+	let text = request.body.text;
+	let password = request.body.password;
+
+	if (text == undefined || password == undefined) {
+		// If the user did not specified the text or password, then we return the error message back to the client
+
+		return response.send({error : 'ValueError', message : 'Either text or password is not specified.'});
+	}
+	// ----
+
+	// Encrypting the user specified text
+	text = Encryption.encrypt(text, password);
+
+	// Returing the encrypted text back to the client
 	return response.send(text);
 });
 
 // Defining the Text utils encrypt (/textutils/decrypt) endpoint
 // POST Request
 app.post('/textutils/decrypt', (request, response) => {
-	/* This function serves the functionality of serving the response when there is a HTTP POST request on the '/textutils/decrypt' URL of the app. The function returns the decrypted and plain form of an already encrypted string as per password and plain string specified by the user. */
+	/* This function serves the functionality of serving the response when there is a HTTP POST request on the '/textutils/decrypt' URL of the app. The function returns the decrypted and plain form of an already encrypted string as per password and plain string specified by the user. The Encryption class is implemented in this endpoint, through which we decrypt the required text. */
 
-	let text = Encryption.decrypt(request.body.text, request.body.password);
+	// Validating the user specified inputs
+	// ----
+	let text = request.body.text;
+	let password = request.body.password;
+
+	if (text == undefined || password == undefined) {
+		// If the user did not specified the text or password, then we return the error message back to the client
+
+		return response.send({error : 'ValueError', message : 'Either text or password is not specified.'});
+	}
+	// ----
+
+	// Decrypting the user specified text
+	text = Encryption.decrypt(text, password);
+
+	// Returing the decrypted text back to the client
 	return response.send(text);
 });
 
