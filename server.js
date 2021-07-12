@@ -8,7 +8,7 @@ Last modified by : Rishav Das (https://github.com/rdofficial/)
 Last modified on : July 12, 2021
 
 Changes made in the last modification :
-1. Added more validation and error reducing codes to the functions. Commented the code for serving the mongoose connection.
+1. Created the function to serve the response at the '/contact'.
 
 Authors contributed to this script (Add your name below if you have contributed) :
 1. Rishav Das (github:https://github.com/rdofficial/, email:rdofficial192@gmail.com)
@@ -154,6 +154,31 @@ app.post('/textutils/capitalize', (request, response) => {
 
 	// Returining the processed text back to the client
 	return response.send(text);
+});
+
+// Defining the contact (/contact) endpoint
+// POST Request
+app.post('/contact', (request, response) => {
+	/* This function serves the functionality to serve the response when there is a HTTP POST request at the '/contact' URL of the web app. This function saves the user specified data into the database as a form of customer contact request. */
+
+	// Validating the user inputs
+	// ----
+	if (request.body.title == undefined) {
+		// If the title of the contact request is not defined, then we return the error message back to the client
+
+		return response.send({error : 'ValueError', message : 'Title of the contact request not defined.'});
+	}
+
+	if (request.body.body == undefined) {
+		// If the body of the contact request is not defined, then we return the error message back to the client
+
+		return response.send({error : 'ValueError', message : 'Body of the contact request is not defined.'});
+	}
+	// ----
+
+	// Saving the contact request into the database
+	// ----
+	// ----
 });
 
 // Listening on the specfic port
